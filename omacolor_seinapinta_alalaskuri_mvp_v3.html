@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmaColor seinäpinta-alalaskuri MVP v2</title>
+<style>
+:root{--bg:#f6f7f8;--card:#fff;--text:#17202a;--muted:#667085;--line:#e5e7eb;--red:#c32026;--dark:#8f1419;--soft:#fff0f1;--shadow:0 12px 30px rgba(16,24,40,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(135deg,var(--dark),var(--red));color:white;padding:24px 32px}.head{max-width:1450px;margin:0 auto;display:flex;gap:22px;align-items:center}.logo{width:180px;height:62px;display:flex;align-items:center;font-weight:900;font-size:28px}.logo img{max-width:100%;max-height:100%;object-fit:contain}
+h1{margin:0 0 6px;font-size:28px}header p{margin:0;opacity:.92;max-width:980px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:22px;padding:24px;max-width:1450px;margin:0 auto}.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}h2{font-size:21px;margin:0 0 12px}h3{font-size:16px;margin:0}.hint{color:var(--muted);font-size:14px;line-height:1.45;margin:6px 0 14px}
+.choice-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.choice{border:1px solid var(--line);border-radius:16px;padding:14px;background:white;cursor:pointer;transition:.12s;min-height:112px}.choice:hover{transform:translateY(-1px);border-color:#98a2b3}.choice.active{border-color:var(--red);background:var(--soft);box-shadow:0 0 0 3px rgba(195,32,38,.1)}.choice strong{display:block;font-size:15px;margin-bottom:4px}.choice span{display:block;color:var(--muted);font-size:12px;line-height:1.3}.icon{height:42px;margin-bottom:10px;color:var(--dark)}svg{width:100%;height:100%}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+label{display:block;font-size:12px;font-weight:750;margin-bottom:5px}input,select{width:100%;padding:10px;border:1px solid #d0d5dd;border-radius:11px;font-size:14px;background:white}input:focus,select:focus{outline:2px solid rgba(195,32,38,.2);border-color:var(--red)}
+.item{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff}.item-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}.item-title{font-weight:900}.mini{font-size:12px;color:var(--muted);font-weight:650;margin-top:3px}.badge{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--dark);font-weight:800;font-size:12px;margin-left:6px}
+button{border:0;background:var(--red);color:#fff;border-radius:12px;padding:11px 14px;font-weight:850;cursor:pointer;font-size:14px}.secondary{background:#fff4f4;color:var(--dark);border:1px solid #ffd0d3}.danger{background:#fff1f0;color:#b42318;border:1px solid #fda29b}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.divider{height:1px;background:var(--line);margin:12px 0}.hidden{display:none!important}
+.sticky{position:sticky;top:18px;align-self:start}.result{font-size:48px;line-height:1;font-weight:900;color:var(--red);margin:8px 0}.result small{font-size:20px;color:var(--muted)}.breakdown{border-top:1px solid var(--line);margin-top:18px;padding-top:12px}.breakdown div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px dashed #eaecf0;font-size:14px}.breakdown b{text-align:right}.warning{color:#7a2e0e;background:#fff4e5;border:1px solid #fedf89;border-radius:14px;padding:12px;font-size:14px;margin-top:14px;white-space:pre-line}.copybox{width:100%;min-height:210px;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:13px;resize:vertical;margin-top:12px;background:#fafafa;white-space:pre-wrap}
+.help{background:#f9fafb;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--muted);font-size:13px;line-height:1.4}
+@media(max-width:1120px){main{grid-template-columns:1fr}.sticky{position:static}.choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.head{flex-direction:column;align-items:flex-start}.grid2,.grid3,.grid4,.choice-grid{grid-template-columns:1fr}.toolbar{display:grid;grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIcAAAApCAYAAAAf8TqUAAABXGlDQ1BJQ0MgUHJvZmlsZQAAeJx1kEFLAlEUhc+YZYSLoKJNhYsKBAuZpI0rc1GBi2EqKBfBOE4qqL3eTMhAi1atguoHuOsPtIsKatemnTCQ+AvaBhKUTPc51WjRe1zu9w7nXS4HCAxrjJWDACpVi6urK5HtnWwk9IIhzGACSUQ13WQpRcmQBd+9/7QdSKI3FsSs44ZZtx9PZ8+c5m0mWjr56+87I3nD1Kl/UMV1xi1AihErNYsJPiIe57QU8bnggseXgnMeX3c9m2qa+Il4VC9qeeIWcSzXoxd6uFI+1L92ENuHjerWhphDNYU1KIggCxUyEnTjqP3jT3T9aeyDwQZHCQUUYdHvFCkMZRjE66hCxyJixDJNk7Escv6dn6/xJpCcBAIXvrbrAFc2MNbytbl5ejPg7p5pXPtJVWoHzb0l2eMwBwbfXPd1GgjdAB3uuu911+1QhgPPwMPBJ9RYZG6ZExDuAAACeElEQVR4nO2b626FIBCEF9P3f2X6p+ZQCwjL7K3wJSYnrQIuw3A15ZxpMzIRpcrvw4MvQBq3unpBXlEgovJ6+Zf/O0Ip4IpjtrIT4xkEs3keJym4Ju7NxcVBO+jccm7Xz7YYdQ5OwGqt0MpBZqmVvVfuxLxnpivulUek4Y04x0pl1p7VcJAIAiRqO/Ho397SWaInDlSGVgJZRVNgo3m93Qctc0sc6MBoCiSKa7hnZkC6SlQH0QIlaljjqIlDsuVFE4iVC7Viohqrpzg0ghFNIFbUZnqqaHYrJUcgY6TiUqcUh7aFRhCIt/KogthbWUFioSzKQtsbrXdQE+ztHJbBjOAg2rgQt9WY4wlaIAhx7S5QN+Ig8uUg2wuDyJc4iLB2yq3gI4wfLnLSvxWgBTJT2UcYBd6c4wYt2DeRmK0lNHBRnpRxh0hnzj9w0zwo4tU5Dg6wXgTrgXaN3skpzQWnkdNiLvDqHMggjRxaclUpXrjIX2DQwrDI91/grVuxEkaZv7ep/Qqz3eWvvS5P4miNAziCkd64a41fpE6E19Jdyeu54Zkrv5OXMYfENHgFxNd7qMPZI+mgvxAgos+A1LK/RQtDat2Gk7ZIpQnkVU3P2jm8OYYEHj9xGKIUh7Z7RBNG2EpmYjbmiCYMFB7fs2kKT3FouMeOwliZeXHzmiFVruoKqeQL7CiMsLS6FQmB7CyMkKuvvTEH8oU0hYEqd1TxwurtbUAqcVA3QtAjlFGckdkK8hS4VtBXyozevuc856IbGp3Kco6tWTuG9p6MB6Ciml3n4J5t9Pa1eo2RMq42EMln4W7D3ZW1doUZZndZR9J7ewZVUZp5/eEbi9iJWwq/MJUAAAAASUVORK5CYII=" alt="OmaColor logo"></div><div><h1>OmaColor seinäpinta-alalaskuri MVP v2</h1><p>Seinäkohtainen laskuri + dynaamiset rakennusosat. Lisää erkkereitä, kuisteja, katoksia, kaiteita, tolppia, räystäitä ja muita osia samalla logiikalla kuin seiniä.</p></div></div></header>
+<main>
+<section>
+<div class="card">
+<h2>1. Valitse talon pohjamuoto</h2>
+<p class="hint">Tämä luo ehdotetun määrän seiniä. Mittaus tehdään silti seinäkohtaisesti, jotta L-, T-, U- ja monimuotoiset talot eivät aiheuta kaavavirheitä.</p>
+<div class="choice-grid" id="shapeChoices">
+<div class="choice active" data-shape="Suorakulmio" data-walls="4"><div class="icon"><svg viewBox="0 0 120 50"><rect x="22" y="12" width="76" height="28" fill="none" stroke="currentColor" stroke-width="5"/></svg></div><strong>Suorakulmio</strong><span>4 seinää</span></div>
+<div class="choice" data-shape="L-talo" data-walls="6"><div class="icon"><svg viewBox="0 0 120 50"><path d="M18 8 H70 V22 H104 V42 H18 Z" fill="none" stroke="currentColor" stroke-width="5"/></svg></div><strong>L-talo</strong><span>6 seinää</span></div>
+<div class="choice" data-shape="T-talo" data-walls="8"><div class="icon"><svg viewBox="0 0 120 50"><path d="M16 8 H104 V22 H70 V44 H50 V22 H16 Z" fill="none" stroke="currentColor" stroke-width="5"/></svg></div><strong>T-talo</strong><span>8 seinää</span></div>
+<div class="choice" data-shape="U-talo" data-walls="8"><div class="icon"><svg viewBox="0 0 120 50"><path d="M18 8 H38 V31 H82 V8 H102 V43 H18 Z" fill="none" stroke="currentColor" stroke-width="5"/></svg></div><strong>U-talo</strong><span>8 seinää</span></div>
+<div class="choice" data-shape="Muu" data-walls="4"><div class="icon"><svg viewBox="0 0 120 50"><polygon points="16,40 28,10 58,19 78,8 104,40" fill="none" stroke="currentColor" stroke-width="5"/></svg></div><strong>Muu</strong><span>Lisää itse</span></div>
+</div>
+</div>
+
+<div class="card">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px"><div><h2>2. Seinät</h2><p class="hint">Jaa seinä osiin, jos korkeus muuttuu. Päätykolmio lisätään samalle seinälle.</p></div><button type="button" id="addWall">+ Lisää seinä</button></div>
+<div id="walls"></div>
+</div>
+
+<div class="card">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px"><div><h2>3. Unohtuiko jotain?</h2><p class="hint">Lisää jokainen kohteessa oleva erikoisosa omana rakennusosanaan.</p></div><button type="button" id="addPart">+ Lisää rakennusosa</button></div>
+<div class="help">Valitse rakennusosan tyyppi pudotusvalikosta. Kertoimet ovat nyt näkyvissä testailua varten.</div>
+<div class="divider"></div>
+<div id="parts"></div>
+</div>
+</section>
+
+<aside class="sticky"><div class="card"><h2>Tulos</h2><div class="result"><span id="total">0</span> <small>m²</small></div><p class="hint">Maalattava puujulkisivupinta-ala. Ei hintaa.</p>
+<div class="breakdown">
+<div><span>Seinäpinnat</span><b id="wallsOut">0 m²</b></div>
+<div><span>Päätykolmiot</span><b id="gablesOut">0 m²</b></div>
+<div><span>Rakennusosat</span><b id="partsOut">0 m²</b></div>
+<div><span>Vähennykset</span><b id="deductOut">0 m²</b></div>
+<div><span>Talon muoto</span><b id="shapeOut">Suorakulmio</b></div>
+</div>
+<div class="warning" id="warningBox"></div>
+<button type="button" id="copyBtn" style="width:100%;margin-top:14px">Kopioi yhteenveto</button>
+<textarea class="copybox" id="summary" readonly></textarea>
+</div></aside>
+</main>
+<script>
+let walls=[];let parts=[];let shapeName="Suorakulmio";
+const $=id=>document.getElementById(id);const round=n=>Math.round((Number(n)||0)*10)/10;
+const partTypes={
+  bay:{name:"Erkkeri",factor:1.15},
+  porch:{name:"Kuisti",factor:1.20},
+  canopy:{name:"Katos / katettu terassi",factor:1.15},
+  balcony:{name:"Parveke",factor:1.25},
+  carport:{name:"Autokatos",factor:1.15},
+  railing:{name:"Kaide",factor:2.40},
+  posts:{name:"Tolpat / pilarit",factor:1.00},
+  eaves:{name:"Räystään alapinta",factor:1.00},
+  fascia:{name:"Otsalaudat / koristelaudat",factor:1.20},
+  garage:{name:"Autotalli / varasto",factor:1.00},
+  glass:{name:"Vähennettävä iso lasipinta / ovi",factor:1.00},
+  manual:{name:"Muu lisäpinta",factor:1.00}
+};
+function val(obj,k){return Number(obj[k])||0}
+function defaultWalls(n){walls=[];for(let i=1;i<=n;i++)walls.push({name:"Seinä "+i,length:0,height:0,gable:false,gableHeight:0});renderWalls();calc()}
+function renderWalls(){const box=$("walls");box.innerHTML="";walls.forEach((w,i)=>{const div=document.createElement("div");div.className="item";div.innerHTML=`<div class="item-head"><div><div class="item-title">${w.name}<span class="badge">Seinä</span></div><div class="mini">Pinta: <span data-wall-area="${i}">0</span> m²</div></div><button class="danger" type="button" data-remove-wall="${i}">Poista</button></div><div class="grid4"><div><label>Nimi</label><input data-wall="${i}" data-k="name" type="text" value="${w.name}"></div><div><label>Pituus (m)</label><input data-wall="${i}" data-k="length" type="number" min="0" step="0.1" value="${w.length}"></div><div><label>Seinäkorkeus (m)</label><input data-wall="${i}" data-k="height" type="number" min="0" step="0.1" value="${w.height}"></div><div><label>Päätykolmio?</label><select data-wall="${i}" data-k="gable"><option value="false" ${!w.gable?"selected":""}>Ei</option><option value="true" ${w.gable?"selected":""}>Kyllä</option></select></div><div><label>Päätykolmion korkeus (m)</label><input data-wall="${i}" data-k="gableHeight" type="number" min="0" step="0.1" value="${w.gableHeight}"></div></div>`;box.appendChild(div)});
+box.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",e=>{const i=Number(e.target.dataset.wall),k=e.target.dataset.k;if(k==="gable")walls[i][k]=e.target.value==="true";else if(k==="name")walls[i][k]=e.target.value;else walls[i][k]=Number(e.target.value)||0;calc();updateWallMini(i)}));
+box.querySelectorAll("[data-remove-wall]").forEach(btn=>btn.addEventListener("click",e=>{walls.splice(Number(e.target.dataset.removeWall),1);renderWalls();calc()}));calc()}
+function updateWallMini(i){
+ const item=document.querySelector(`[data-wall-area="${i}"]`)?.closest(".item");
+ if(!item||!walls[i])return;
+ const title=item.querySelector(".item-title");
+ if(title) title.childNodes[0].nodeValue=walls[i].name;
+ const span=document.querySelector(`[data-wall-area="${i}"]`);
+ if(span){
+   const wa=val(walls[i],"length")*val(walls[i],"height");
+   const ga=walls[i].gable?val(walls[i],"length")*val(walls[i],"gableHeight")/2:0;
+   span.textContent=round(wa+ga);
+ }
+}
+function addPart(type="bay"){parts.push({type, name:partTypes[type].name+" "+(parts.length+1), factor:partTypes[type].factor, a:0,b:0,c:0,d:1, sides:"3", note:""});renderParts();calc()}
+function partFields(p,i){
+ const common=`<div class="grid4"><div><label>Tyyppi</label><select data-part="${i}" data-k="type">${Object.keys(partTypes).map(t=>`<option value="${t}" ${p.type===t?"selected":""}>${partTypes[t].name}</option>`).join("")}</select></div><div><label>Nimi</label><input data-part="${i}" data-k="name" type="text" value="${p.name}"></div><div><label>Kerroin</label><input data-part="${i}" data-k="factor" type="number" min="0" step="0.05" value="${p.factor}"></div><div><label>Huomio</label><input data-part="${i}" data-k="note" type="text" value="${p.note||""}" placeholder="vapaa kommentti"></div></div><div class="divider"></div>`;
+ if(p.type==="bay") return common+`<div class="grid4"><div><label>Etuseinä leveys (m)</label><input data-part="${i}" data-k="a" type="number" step="0.1" value="${p.a}"></div><div><label>Sivuseinän syvyys (m)</label><input data-part="${i}" data-k="b" type="number" step="0.1" value="${p.b}"></div><div><label>Korkeus (m)</label><input data-part="${i}" data-k="c" type="number" step="0.1" value="${p.c}"></div><div><label>Määrä</label><input data-part="${i}" data-k="d" type="number" step="1" value="${p.d}"></div></div><p class="hint">Perusala: (etu + 2 × sivu) × korkeus × määrä.</p>`;
+ if(["porch","canopy","balcony","carport"].includes(p.type)) return common+`<div class="grid4"><div><label>Etuleveys (m)</label><input data-part="${i}" data-k="a" type="number" step="0.1" value="${p.a}"></div><div><label>Sivusyvyys (m)</label><input data-part="${i}" data-k="b" type="number" step="0.1" value="${p.b}"></div><div><label>Korkeus (m)</label><input data-part="${i}" data-k="c" type="number" step="0.1" value="${p.c}"></div><div><label>Maalattavat sivut</label><select data-part="${i}" data-k="sides"><option value="1" ${p.sides==="1"?"selected":""}>Vain etu</option><option value="2" ${p.sides==="2"?"selected":""}>Etu + 1 sivu</option><option value="3" ${p.sides==="3"?"selected":""}>Etu + 2 sivua</option></select></div></div><p class="hint">Perusala: (etuleveys + sivujen määrä × sivusyvyys) × korkeus.</p>`;
+ if(p.type==="railing") return common+`<div class="grid3"><div><label>Kaiteen pituus yht. (m)</label><input data-part="${i}" data-k="a" type="number" step="0.1" value="${p.a}"></div><div><label>Korkeus (m)</label><input data-part="${i}" data-k="b" type="number" step="0.1" value="${p.b||0.9}"></div><div><label>Määrä / osiot</label><input data-part="${i}" data-k="d" type="number" step="1" value="${p.d}"></div></div>`;
+ if(p.type==="posts") return common+`<div class="grid4"><div><label>Tolppien määrä</label><input data-part="${i}" data-k="a" type="number" step="1" value="${p.a}"></div><div><label>Korkeus (m)</label><input data-part="${i}" data-k="b" type="number" step="0.1" value="${p.b||2.5}"></div><div><label>Ympärys/vakio (m)</label><input data-part="${i}" data-k="c" type="number" step="0.05" value="${p.c||0.4}"></div><div><label>Lisämäärä</label><input data-part="${i}" data-k="d" type="number" step="1" value="${p.d}"></div></div>`;
+ if(p.type==="eaves"||p.type==="fascia") return common+`<div class="grid3"><div><label>Pituus yht. (m)</label><input data-part="${i}" data-k="a" type="number" step="0.1" value="${p.a}"></div><div><label>Leveys/korkeus (m)</label><input data-part="${i}" data-k="b" type="number" step="0.05" value="${p.b||0.5}"></div><div><label>Määrä</label><input data-part="${i}" data-k="d" type="number" step="1" value="${p.d}"></div></div>`;
+ if(p.type==="garage") return common+`<div class="grid4"><div><label>Pituus (m)</label><input data-part="${i}" data-k="a" type="number" step="0.1" value="${p.a}"></div><div><label>Leveys (m)</label><input data-part="${i}" data-k="b" type="number" step="0.1" value="${p.b}"></div><div><label>Seinäkorkeus (m)</label><input data-part="${i}" data-k="c" type="number" step="0.1" value="${p.c}"></div><div><label>Päätykorkeus (m)</label><input data-part="${i}" data-k="d" type="number" step="0.1" value="${p.d}"></div></div>`;
+ if(p.type==="glass") return common+`<div class="grid3"><div><label>Vähennettävä leveys yht. (m)</label><input data-part="${i}" data-k="a" type="number" step="0.1" value="${p.a}"></div><div><label>Korkeus (m)</label><input data-part="${i}" data-k="b" type="number" step="0.1" value="${p.b}"></div><div><label>Määrä</label><input data-part="${i}" data-k="d" type="number" step="1" value="${p.d}"></div></div><p class="hint">Tämä vähennetään kokonaispinta-alasta.</p>`;
+ return common+`<div class="grid3"><div><label>Lisäpinta (m²)</label><input data-part="${i}" data-k="a" type="number" step="0.5" value="${p.a}"></div><div><label>Määrä</label><input data-part="${i}" data-k="d" type="number" step="1" value="${p.d}"></div><div><label>Ei käytössä</label><input disabled value="Perusala = lisäpinta × määrä"></div></div>`;
+}
+function renderParts(){const box=$("parts");box.innerHTML="";parts.forEach((p,i)=>{const cp=calcPart(p);const div=document.createElement("div");div.className="item";div.innerHTML=`<div class="item-head"><div><div class="item-title">${p.name||partTypes[p.type].name}<span class="badge">${partTypes[p.type].name}</span></div><div class="mini">${p.type==="glass"?"Vähennys":"Pinta"}: <span data-part-area="${i}">${round(cp.signed)}</span> m²</div></div><button class="danger" type="button" data-remove-part="${i}">Poista</button></div>${partFields(p,i)}`;box.appendChild(div)});
+box.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",e=>{const i=Number(e.target.dataset.part),k=e.target.dataset.k;if(k==="type"){const old=parts[i];parts[i]={type:e.target.value,name:partTypes[e.target.value].name+" "+(i+1),factor:partTypes[e.target.value].factor,a:0,b:0,c:0,d:1,sides:"3",note:old.note||""};renderParts();calc();return} else if(k==="name"||k==="sides"||k==="note")parts[i][k]=e.target.value;else parts[i][k]=Number(e.target.value)||0;calc();updatePartMini(i)}));
+box.querySelectorAll("[data-remove-part]").forEach(btn=>btn.addEventListener("click",e=>{parts.splice(Number(e.target.dataset.removePart),1);renderParts();calc()}));calc()}
+function updatePartMini(i){const span=document.querySelector(`[data-part-area="${i}"]`);if(span)span.textContent=round(calcPart(parts[i]).signed)}
+function calcPart(p){let base=0;let deduct=false;const a=val(p,"a"),b=val(p,"b"),c=val(p,"c"),d=val(p,"d")||1,f=val(p,"factor")||1;
+ if(p.type==="bay")base=(a+2*b)*c*d;
+ else if(["porch","canopy","balcony","carport"].includes(p.type)){const sideCount=Math.max(0,Number(p.sides||1)-1);base=(a+sideCount*b)*c;}
+ else if(p.type==="railing")base=a*(b||0.9)*d;
+ else if(p.type==="posts")base=a*(b||2.5)*(c||0.4)*(d||1);
+ else if(p.type==="eaves"||p.type==="fascia")base=a*(b||0.5)*d;
+ else if(p.type==="garage")base=2*a*c+2*b*c+b*d;
+ else if(p.type==="glass"){base=a*b*d;deduct=true;}
+ else base=a*d;
+ const adjusted=base*f;return{base,adjusted,deduct,signed:deduct?-adjusted:adjusted}}
+function wallSums(){let wallArea=0,gableArea=0;walls.forEach((w,i)=>{const wa=val(w,"length")*val(w,"height");const ga=w.gable?val(w,"length")*val(w,"gableHeight")/2:0;wallArea+=wa;gableArea+=ga;const span=document.querySelector(`[data-wall-area="${i}"]`);if(span)span.textContent=round(wa+ga)});return{wallArea,gableArea}}
+function partSums(){let add=0,deduct=0;parts.forEach(p=>{const cp=calcPart(p);if(cp.deduct)deduct+=cp.adjusted;else add+=cp.adjusted});return{add,deduct}}
+function calc(){const ws=wallSums(),ps=partSums(),total=Math.max(0,ws.wallArea+ws.gableArea+ps.add-ps.deduct);$("total").textContent=round(total);$("wallsOut").textContent=round(ws.wallArea)+" m²";$("gablesOut").textContent=round(ws.gableArea)+" m²";$("partsOut").textContent=round(ps.add)+" m²";$("deductOut").textContent="-"+round(ps.deduct)+" m²";$("shapeOut").textContent=shapeName;let warnings=[];if(walls.length<4)warnings.push("Seiniä alle 4 — tarkista, että kaikki julkisivut on lisätty.");if(ws.gableArea===0)warnings.push("Päätykolmioita ei ole lisätty. Jos talossa on harjakatto, tarkista päädyt.");if(!parts.some(p=>p.type==="eaves"||p.type==="fascia"))warnings.push("Räystäitä/otsalautoja ei ole lisätty. Maalataanko ne?");if(!parts.some(p=>["bay","porch","canopy","balcony","carport"].includes(p.type)))warnings.push("Erkkereitä, kuisteja tai katoksia ei ole lisätty. Tarkista kuvista.");$("warningBox").textContent=warnings.slice(0,4).join("\\n");
+const partLines=parts.map(p=>{const cp=calcPart(p);return `- ${p.name||partTypes[p.type].name} (${partTypes[p.type].name}): ${round(cp.signed)} m², kerroin ${p.factor}${p.note?`, ${p.note}`:""}`}).join("\\n")||"- Ei rakennusosia";
+$("summary").value=`OMACOLOR SEINÄMITTAUS
+Talon muoto: ${shapeName}
+
+Seinäpinnat: ${round(ws.wallArea)} m²
+Päätykolmiot: ${round(ws.gableArea)} m²
+Rakennusosat: ${round(ps.add)} m²
+Vähennykset: -${round(ps.deduct)} m²
+
+MAALATTAVA PUUJULKISIVUPINTA-ALA YHTEENSÄ: ${round(total)} m²
+
+SEINÄT:
+${walls.map(w=>`- ${w.name}: ${w.length} m × ${w.height} m${w.gable?`, pääty ${w.gableHeight} m`:""}`).join("\\n")}
+
+RAKENNUSOSAT:
+${partLines}`;}
+document.querySelectorAll("#shapeChoices .choice").forEach(card=>card.addEventListener("click",()=>{document.querySelectorAll("#shapeChoices .choice").forEach(x=>x.classList.remove("active"));card.classList.add("active");shapeName=card.dataset.shape;defaultWalls(Number(card.dataset.walls)||4)}));
+$("addWall").addEventListener("click",()=>{walls.push({name:"Seinä "+(walls.length+1),length:0,height:0,gable:false,gableHeight:0});renderWalls()});
+$("addPart").addEventListener("click",()=>addPart("bay"));
+$("copyBtn").addEventListener("click",async()=>{$("summary").select();try{await navigator.clipboard.writeText($("summary").value)}catch(e){document.execCommand("copy")}$("copyBtn").textContent="Kopioitu";setTimeout(()=>$("copyBtn").textContent="Kopioi yhteenveto",1200)});
+defaultWalls(4);addPart("bay");
+</script>
+</body>
+</html>
